@@ -43,7 +43,7 @@ public class Chess {
      * @return 空返回true，否则返回false
      */
     public boolean IsEmpty(int x, int y) {
-        if (this.kChess_[x-1][y-1] == null)
+        if (this.kChess_[x - 1][y - 1] == null)
             return true;
         else
             return false;
@@ -57,7 +57,7 @@ public class Chess {
      * @param piece_type 棋子类型
      */
     public void Add(int x, int y, Board.kPieceType piece_type) {
-        this.kChess_[x-1][y-1] = piece_type;
+        this.kChess_[x - 1][y - 1] = piece_type;
     }
 
     /**
@@ -94,7 +94,7 @@ public class Chess {
                 for (int k = 0; k < 5; k++) { //单方向遍历
                     x_tmp += j[0];
                     y_tmp += j[1];
-                    if (In(x_tmp, y_tmp) && this.kChess_[x_tmp-1][y_tmp-1] == piece_type)
+                    if (In(x_tmp, y_tmp) && this.kChess_[x_tmp - 1][y_tmp - 1] == piece_type)
                         count++;
                     else
                         continue;
@@ -127,10 +127,11 @@ public class Chess {
         this.board_.canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.printf("%d,%d\n",e.getX(),e.getY());
+                System.out.printf("%d,%d\n", e.getX(), e.getY());
                 int tmp[] = board.Convert(e.getX(), e.getY());
-
-                if (IsEmpty(tmp[0], tmp[1]) == true) //是否为空
+                if (tmp == null)
+                    return;
+                else if (IsEmpty(tmp[0], tmp[1]) == true) //是否为空
                 {
                     board.canvas.DrawChess(tmp[0], tmp[1], kNextPiece);
                     Add(tmp[0], tmp[1], kNextPiece);//添加棋子
@@ -141,14 +142,14 @@ public class Chess {
                             case kBlack -> System.out.printf("黑子赢");
                         }
                         board.frame.setEnabled(false);
-                    }else{
-                        switch (kNextPiece){
-                            case kBlack ->kNextPiece=Board.kPieceType.kWhite;
-                            case kWhite ->kNextPiece=Board.kPieceType.kBlack;
+                    } else {
+                        switch (kNextPiece) {
+                            case kBlack -> kNextPiece = Board.kPieceType.kWhite;
+                            case kWhite -> kNextPiece = Board.kPieceType.kBlack;
                         }
                     }
+                    super.mouseClicked(e);
                 }
-                super.mouseClicked(e);
             }
         });
     }
