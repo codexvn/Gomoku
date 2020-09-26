@@ -1,7 +1,13 @@
 package Project;
 
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 public class Chess {
     private Board.kPieceType kChess_[][];
+    private Board.kPieceType kNextPiece;
+    private Board board_;
 
     /**
      * 构造函数，空棋局
@@ -37,7 +43,7 @@ public class Chess {
      * @return 空返回true，否则返回false
      */
     public boolean IsEmpty(int x, int y) {
-        if (this.kChess_[x][y] == null)
+        if (this.kChess_[x-1][y-1] == null)
             return true;
         else
             return false;
@@ -51,7 +57,7 @@ public class Chess {
      * @param piece_type 棋子类型
      */
     public void Add(int x, int y, Board.kPieceType piece_type) {
-        this.kChess_[x][y] = piece_type;
+        this.kChess_[x-1][y-1] = piece_type;
     }
 
     /**
@@ -79,33 +85,72 @@ public class Chess {
                 {{1, -1}/*往左上*/, {-1, 1}/*往右下*/}, //左斜方向移动
                 {{-1, -1}/*往左下*/, {1, 1}/*往右上*/} //右斜方向移动
         };
-        int count,x_tmp,y_tmp;
-        for (int[][] i:foot) {
-            count=1; //计算连子数量
-            for (int[] j:i) { //直线方向共9格遍历
-                x_tmp=x;
-                y_tmp=y;
+        int count, x_tmp, y_tmp;
+        for (int[][] i : foot) {
+            count = 1; //计算连子数量
+            for (int[] j : i) { //直线方向共9格遍历
+                x_tmp = x;
+                y_tmp = y;
                 for (int k = 0; k < 5; k++) { //单方向遍历
-                    x_tmp+=j[0];
-                    y_tmp+=j[1];
-                    if(In(x_tmp,y_tmp) && this.kChess_[x_tmp][y_tmp] == piece_type)
+                    x_tmp += j[0];
+                    y_tmp += j[1];
+                    if (In(x_tmp, y_tmp) && this.kChess_[x_tmp-1][y_tmp-1] == piece_type)
                         count++;
                     else
                         continue;
                 }
             }
-            if(count>=5)
+            if (count >= 5)
                 return true;
         }
         return false;
     }
-    public boolean In(int x, int y)
-    {
-        if(x<=0 || x > this.kChess_.length)
+
+    /**
+     * 当前棋子是否在棋局范围内
+     *
+     * @param x 行
+     * @param y 列
+     */
+    public boolean In(int x, int y) {
+        if (x <= 0 || x >= this.kChess_.length)
             return false;
-        else if(y<=0 || x > this.kChess_[0].length)
+        else if (y <= 0 || y >= this.kChess_[0].length)
             return false;
         else
             return true;
     }
+
+    public void GameStart(Board board) {
+        this.kNextPiece = Board.kPieceType.kWhite;
+        this.board_ = board;
+        this.board_.canvas.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                System.out.printf("%d,%d\n",e.getX(),e.getY());
+                int tmp[] = board.Convert(e.getX(), e.getY());
+
+                if (IsEmpty(tmp[0], tmp[1]) == true) //是否为空
+                {
+                    board.canvas.DrawChess(tmp[0], tmp[1], kNextPiece);
+                    Add(tmp[0], tmp[1], kNextPiece);//添加棋子
+                    board.canvas.DrawChess(tmp[0], tmp[1], kNextPiece);
+                    if (IsWin(tmp[0], tmp[1], kNextPiece)) {
+                        switch (kNextPiece) {
+                            case kWhite -> System.out.printf("白子赢");
+                            case kBlack -> System.out.printf("黑子赢");
+                        }
+                        board.frame.setEnabled(false);
+                    }else{
+                        switch (kNextPiece){
+                            case kBlack ->kNextPiece=Board.kPieceType.kWhite;
+                            case kWhite ->kNextPiece=Board.kPieceType.kBlack;
+                        }
+                    }
+                }
+                super.mouseClicked(e);
+            }
+        });
+    }
+
 }
